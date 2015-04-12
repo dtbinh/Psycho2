@@ -130,11 +130,10 @@ Marble::Marble (Game *_game, Node *_node, int _type, int _player) {
     type = int2type(_type);
     owner = _player;
     node->marble = this;
-    isAlive = true;
 }
 
 void Marble::display (bool full, bool cr) {
-    cout << owner << (isAlive?" x ":"   ") << node->index << "\t" << type2str(type) << "  ";
+    cout << owner << (isAlive()?" x ":"   ") << node->index << "\t" << type2str(type) << "  ";
     if (full) for (int j=0; j<accessibleNodes.size(); j++) cout << accessibleNodes[j]->index << " ";
     if (cr) cout << endl;
 }
@@ -164,7 +163,6 @@ void Marble::kill () {
     int firstIndexFree = NBNODES;
     while (game->nodes[firstIndexFree]->marble != NULL) firstIndexFree++;
     move (game->nodes[firstIndexFree]);
-    isAlive = false;
 
     if(type==PSY){
         // TODO respawn
@@ -263,6 +261,8 @@ bool Marble::isCaptured(){
     }
     return false;
 }
+
+bool Marble::isAlive(){ return this->node->index < NBNODES;}
 
 string Marble::type2str (MarbleType type) {
     return (type==PKP)?"psychopath":((type==PSY)?"psychologist":((type==INF)?"doctor":((type==DEL)?"informer":"unknown")));

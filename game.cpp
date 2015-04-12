@@ -1,5 +1,5 @@
 #include "game.h"
-
+#include <ctime>
 
 extern const int NBNODES (163);
 extern const int NBPATHS (28);
@@ -13,7 +13,7 @@ extern const string CURPOSFILE = DATAPATH + "positions.txt";
 
 extern const bool VERBOSE (true);
 extern const bool GUI (false);
-extern const bool TIMEOUT (60);
+extern const int TIMEOUT (60);
 
 
 
@@ -120,7 +120,7 @@ int Game::eval (int player) {
     int evaluation = 0;
     for(int i = 0; i < 2; i++)
         for(int j = 0; j < NBMARBLES; j++)
-            if(!marbles[i][j]->isAlive) evaluation = (i == player) ? evaluation-1 : evaluation+1;
+            if(!marbles[i][j]->isAlive()) evaluation = (i == player) ? evaluation-1 : evaluation+1;
 
     return evaluation;
 }
@@ -135,8 +135,10 @@ void Game::runMinimax () {
 
     Tree* bestTree = start;
     int bestScore = INT_MIN;
+    time_t beginning;
+    beginning = time(0);
 
-    while(!list.empty() && TIMEOUT){
+    while(!list.empty() && time(0) < beginning + TIMEOUT){
         Tree* currentTree = list[listCpt];
         this->setBoard(currentTree);
         for(int j = 0; j < NBMARBLES; j++){

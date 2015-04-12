@@ -70,13 +70,13 @@ struct Marble {
 	Game *game;
 	MarbleType type;
 	int owner;
-	bool isAlive;
 	Node *node;
 	vector<Node*> accessibleNodes;
 
     Marble (Game *_game, Node *_node, int _type, int _player);
     
     bool isCaptured();
+    bool isAlive();
     void updateAccessibleNodes ();
     void move (Node *dst);
     void kill ();

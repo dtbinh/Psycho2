@@ -15,7 +15,7 @@ extern const string CURPOSFILE;
 
 extern const bool VERBOSE;
 extern const bool GUI;
-extern const bool TIMEOUT;
+extern const int TIMEOUT;
 
 static void warningMsg (string s) { cout << s << endl; }
 static void exitError (string s) { cout << s << endl; exit (EXIT_FAILURE); }
