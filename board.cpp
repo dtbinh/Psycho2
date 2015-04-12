@@ -107,7 +107,8 @@ bool Path::wellOrdered (Node *n1, Node *n2, Node *n3) {
     }else{
         for(int i = 0; i < this->size; i++){
             if(this->nodes[i] == n2 && !extFound) return false;
-            if(this->nodes[i] == n1 || this->nodes[i] == n3 && extFound) return false;
+            if(this->nodes[i] == n2 && extFound) return true;
+            if((this->nodes[i] == n1 || this->nodes[i] == n3) && extFound) return false;
             if(this->nodes[i] == n1 || this->nodes[i] == n3) extFound = true;
         }
     }
@@ -148,12 +149,15 @@ void Marble::move (Node *dst) {
     for (int i=0; i<3; i++) if (src->paths[i] != NULL) src->paths[i]->updateMarbles();
     if(this->isCaptured()){
         kill();
-    }else if(this->type==INF || this->type==DEL){
+    }
+    /*
+     * else if(this->type==INF || this->type==DEL){
         for(int j = 0; j < NBMARBLES; j++){
             if(game->marbles[(owner+1)%2][j]->isCaptured())
                 game->marbles[(owner+1)%2][j]->kill();
         }
     }
+    */
 }
 
 void Marble::kill () {
@@ -223,6 +227,8 @@ void Marble::updateAccessibleNodes () {
 bool Marble::isCaptured(){
     vector<int> surrounded;
     vector<int> watched;
+    surrounded.clear();
+    watched.clear();
     for(int i = 0; i < 3; i++){
         bool watchedOnPath = false;
         bool surroundedOnPath = false;
@@ -238,6 +244,7 @@ bool Marble::isCaptured(){
                 continue;
             }if(ms[j]->type == INF && !surroundedOnPath){
                 for(int k = j+1; k < ms.size(); k++){
+                    if(ms[k]->owner == this->owner) continue;
                     if(ms[k]->type == INF && p->wellOrdered(ms[j]->node, this->node, ms[k]->node)){
                         surroundedOnPath = true;
                         surrounded.push_back(i);

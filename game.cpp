@@ -31,7 +31,7 @@ Game::Game()
     //updateGUI (CURPOSFILE); marbles[0][7]->kill(); marbles[1][3]->kill();
     //for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) marbles[j][i]->display (false, true);
     //updateGUI (CURPOSFILE);
-    //for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) { marbles[j][i]->updateAccessibleNodes (); marbles[j][i]->display (true, true);}
+    for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) { marbles[j][i]->updateAccessibleNodes (); marbles[j][i]->display (true, true);}
 }
 
 
