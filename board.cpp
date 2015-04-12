@@ -150,7 +150,8 @@ void Marble::move (Node *dst) {
         kill();
     }else if(this->type==INF || this->type==DEL){
         for(int j = 0; j < NBMARBLES; j++){
-            if(game->marbles[(owner+1)%2][j]->isCaptured()) game->marbles[(owner+1)%2][j]->kill();
+            if(game->marbles[(owner+1)%2][j]->isCaptured())
+                game->marbles[(owner+1)%2][j]->kill();
         }
     }
 }
@@ -192,12 +193,12 @@ void Marble::updateAccessibleNodes () {
         }
         if(!node->dirPaths[i+1].empty()){
             bool marbleEncountered  = false;
-            for (int j=0; j<node->dirPaths[i].size(); j++) {
-                Marble *m = node->dirPaths[i][j]->marble ;
+            for (int j=0; j<node->dirPaths[i+1].size(); j++) {
+                Marble *m = node->dirPaths[i+1][j]->marble ;
                 if (m == NULL){
                     if(!marbleEncountered){
-                        thisPathAccessibleNodes.push_back(node->dirPaths[i][j]);
-                        accessibleNodes.push_back(node->dirPaths[i][j]);
+                        thisPathAccessibleNodes.push_back(node->dirPaths[i+1][j]);
+                        accessibleNodes.push_back(node->dirPaths[i+1][j]);
                     }
                 }else if (m->type != PSY) marbleEncountered = true;
                 else if(m->owner != this->owner)
