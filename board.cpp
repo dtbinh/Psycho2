@@ -86,15 +86,17 @@ int Path::countSpecialNodesInBetween (Node *n1, Node *n2, Node *n3) {
     int nodeId = 0;
     int specialNodes = 0;
     bool rightWay = false;
-    while(this->nodes[nodeId] != n1 && this->nodes[nodeId] != n3)
+    while(nodeId < this->size && this->nodes[nodeId] != n1 && this->nodes[nodeId] != n3)
         nodeId++;
     for(int i = (nodeId+1) % this->size; i != nodeId; i = (i+1)%this->size){
         if(this->nodes[i] == n2) rightWay = true;
+        if(this->nodes[i] == n1 || this->nodes[i] == n3) break;
         if(this->nodes[i]->isSpecial) specialNodes++;
     }
     if(rightWay) return specialNodes;
     specialNodes = 0;
     for(int i = (nodeId==0) ? this->size-1 : nodeId-1; i != nodeId; i = (i==0) ? this->size - 1 : i-1){
+        if(this->nodes[i] == n1 || this->nodes[i] == n3) break;
         if(this->nodes[i]->isSpecial) specialNodes++;
     }
     return specialNodes;
@@ -140,23 +142,25 @@ void Marble::display (bool full, bool cr) {
 
 void Marble::move (Node *dst) {
     // PB
-    Node* src = node;
-    node->marble = NULL;
-    node = dst;
-    node->marble = this;
-    for (int i=0; i<3; i++) if (node->paths[i]!= NULL) node->paths[i]->updateMarbles();
-    for (int i=0; i<3; i++) if (src->paths[i] != NULL) src->paths[i]->updateMarbles();
+    Node* src = this->node;
+    this->node->marble = NULL;
+    this->node = dst;
+    this->node->marble = this;
+    for (int i=0; i<3; i++)
+        if (node->paths[i]!= NULL)
+            node->paths[i]->updateMarbles();
+    for (int i=0; i<3; i++)
+        if (src->paths[i] != NULL)
+            src->paths[i]->updateMarbles();
     if(this->isCaptured()){
         kill();
     }
-    /*
-     * else if(this->type==INF || this->type==DEL){
+    else if(this->type==INF || this->type==DEL){
         for(int j = 0; j < NBMARBLES; j++){
             if(game->marbles[(owner+1)%2][j]->isCaptured())
                 game->marbles[(owner+1)%2][j]->kill();
         }
     }
-    */
 }
 
 void Marble::kill () {

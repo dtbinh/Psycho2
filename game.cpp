@@ -31,7 +31,7 @@ Game::Game()
     //updateGUI (CURPOSFILE); marbles[0][7]->kill(); marbles[1][3]->kill();
     //for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) marbles[j][i]->display (false, true);
     //updateGUI (CURPOSFILE);
-    for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) { marbles[j][i]->updateAccessibleNodes (); marbles[j][i]->display (true, true);}
+    //for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) { marbles[j][i]->updateAccessibleNodes (); marbles[j][i]->display (true, true);}
 }
 
 
@@ -85,6 +85,9 @@ void Game::initMatch (string openingFile, int turn) {
     
     else exitError ("couldn't open file " + openingFile);
     
+    for(int i = 0; i < NBPATHS; i++){
+        paths[i]->updateMarbles();
+    }
     // who's turn to play
     whosTurn = turn;
 }
@@ -110,6 +113,7 @@ void Game::setBoard(Tree * t){
     for(int i = 0; i < 2; i++){
         for(int j = 0; j < NBMARBLES; j++){
             this->nodes[t->marblesPositions[i][j]]->marble = this->marbles[i][j];
+            this->marbles[i][j]->node = this->nodes[t->marblesPositions[i][j]];
         }
     }
     for(int i = 0; i < NBPATHS; i++) this->paths[i]->updateMarbles();
@@ -160,6 +164,5 @@ void Game::runMinimax () {
         }
         listCpt++;
     }
-
-    bestTree->displayConsole();
+    cout << "Meilleur score : " << bestScore << endl;
 }
