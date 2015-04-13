@@ -35,8 +35,8 @@ Game::Game()
 }
 
 
-void Game::initBoard (string pathsFile) {
 
+void Game::initBoard (string pathsFile) {
     // create nodes (no marble, just empty board)
     for (int i=0; i<BOARDSIZE; i++) nodes[i] = new Node (this, i, NULL);
 
@@ -166,3 +166,71 @@ void Game::runMinimax () {
     }
     cout << "Meilleur score : " << bestScore << endl;
 }
+
+/* TESTS */
+
+void Game::generateGames(int nbGames, bool alive){
+    initBoard (PATHSFILE);    // creating nodes and paths
+    bool alreadyMarble;
+    int type;
+    int rdm;
+    double average = 0.0;
+    srand (time(NULL)); //Setting the seed for random number generator
+
+    // Placing randomly marbles
+    for(int n = 0 ; n < nbGames ; n++){
+        //cout << "Generation game " << n << "                  \r";
+
+        // Empty the board
+        for(int nId = 0 ; nId < BOARDSIZE ; nId++) nodes[nId]->marble = NULL;
+
+        // create marbles
+        for(int p = 0 ; p < 2 ; p++){
+            for(int i = 0 ; i < NBMARBLES ; i++){
+                alreadyMarble = true;
+                while(alreadyMarble){
+                    if(!alive){
+                        rdm = rand() % BOARDSIZE;
+                    }
+                    else{
+                        rdm = rand() % NBNODES;
+                    }
+                    alreadyMarble = (nodes[rdm]->marble != NULL);
+                    //if(alreadyMarble) cout << "                          Aie " << n << "    " << rdm << "          \r";
+                }
+                if(i < 6) type = INF;
+                else if(i < 10) type = DEL;
+                else if(i < 12) type = PSY;
+                else type = PKP;
+
+                marbles[p][i] = new Marble (this, nodes[rdm], type, 0);
+            }
+        }
+        //Update marbles on path
+        for(int i = 0; i < NBPATHS; i++){
+            paths[i]->updateMarbles();
+        }
+
+        // Check for kills
+        for(int p = 0 ; p < 2 ; p++){
+            for(int i = 0 ; i < NBMARBLES ; i++){
+                if(marbles[p][i]->isCaptured())marbles[p][i]->kill();
+            }
+        }
+
+        int totalpossibilities = 0;
+        // Compute possibilities
+        for(int p = 0 ; p < 2 ; p++){
+            for(int i = 0 ; i < NBMARBLES ; i++){
+                marbles[p][i]->updateAccessibleNodes();
+                totalpossibilities+=marbles[p][i]->accessibleNodes.size();
+            }
+        }
+        average += totalpossibilities / 2;
+    }
+
+    average /= nbGames;
+    cout << endl << endl << "Moyenne : " << average << endl;
+}
+
+

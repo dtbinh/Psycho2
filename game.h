@@ -25,6 +25,9 @@ private:
     Tree *minimax;
     int eval (int player);						// evaluation function used in minimax
 
+
+
+
 public:
 
     Node *nodes[190];
@@ -38,6 +41,8 @@ public:
 
     void runMinimax();
 
+    /* Tests */
+    void generateGames(int nbGames, bool alive);
 };
 
 #endif
