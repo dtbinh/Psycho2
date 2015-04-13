@@ -4,7 +4,7 @@
 int main()
 {
    Game *game = new Game();
-   game->runMinimax();
+   //game->runMinimax();
    
    return 0;
 }
