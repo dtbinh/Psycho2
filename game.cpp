@@ -1,5 +1,6 @@
 #include "game.h"
 #include <ctime>
+#include <cmath>
 
 extern const int NBNODES (163);
 extern const int NBPATHS (28);
@@ -31,7 +32,7 @@ Game::Game()
     //updateGUI (CURPOSFILE); marbles[0][7]->kill(); marbles[1][3]->kill();
     //for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) marbles[j][i]->display (false, true);
     //updateGUI (CURPOSFILE);
-    for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) { marbles[j][i]->updateAccessibleNodes (); marbles[j][i]->display (true, true);}
+    //for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) { marbles[j][i]->updateAccessibleNodes (); marbles[j][i]->display (true, true);}
 }
 
 
@@ -45,7 +46,7 @@ void Game::initBoard (string pathsFile) {
     file.open (pathsFile.c_str(), ios::in);
     vector<int> nodeIdxList;
     int currentPathidx = 0;
-    int tmpIdx;
+    int tmpIdx;    
 
     if (file) {
         string line;
@@ -202,12 +203,17 @@ void Game::runMinimax () {
 /* TESTS */
 
 void Game::generateGames(int nbGames, bool alive){
-    initBoard (PATHSFILE);    // creating nodes and paths
     bool alreadyMarble;
     int type;
     int rdm;
     double average = 0.0;
+    double variance = 0.0;
+    int possibilities[nbGames];
+
+    initBoard (PATHSFILE);    // creating nodes and paths
     srand (time(NULL)); //Setting the seed for random number generator
+
+
 
     // Placing randomly marbles
     for(int n = 0 ; n < nbGames ; n++){
@@ -258,11 +264,21 @@ void Game::generateGames(int nbGames, bool alive){
                 totalpossibilities+=marbles[p][i]->accessibleNodes.size();
             }
         }
+        possibilities[n] = totalpossibilities / 2;
         average += totalpossibilities / 2;
     }
 
     average /= nbGames;
     cout << endl << endl << "Moyenne : " << average << endl;
+
+    // calcul ecart type
+    for(int n = 0 ; n < nbGames ; n++){
+        variance += pow(possibilities[n] - average, 2.0);
+    }
+    variance = 1.0/nbGames * variance;
+
+    cout << endl << "Ecart type : " << sqrt(variance) << endl;
+
 }
 
 

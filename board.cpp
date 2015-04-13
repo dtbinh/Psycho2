@@ -175,9 +175,6 @@ void Marble::kill () {
 }
 
 void Marble::updateAccessibleNodes () {
-    if(node->index == 34){
-        cout << "hello" << endl;
-    }
     accessibleNodes.clear ();
     bool semi_paralysis = false;
     for (int i=0; i<6; i+=2){

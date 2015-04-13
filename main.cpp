@@ -5,7 +5,7 @@ int main()
 {
    Game *game = new Game();
    //game->runMinimax();
-   game->generateGames(10000, false);
+   game->generateGames(1000, false);
    
    return 0;
 }
