@@ -35,6 +35,7 @@ public:
     Marble *marbles[2][13];
     
 	int whosTurn;								// 0: computer / 1: human
+    void chooseRespawn(int player, Node* dst);
 	
     Game();
     ~Game();

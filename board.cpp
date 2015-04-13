@@ -164,17 +164,20 @@ void Marble::move (Node *dst) {
 }
 
 void Marble::kill () {
+    Node* src = this->node;
     int firstIndexFree = NBNODES;
     while (game->nodes[firstIndexFree]->marble != NULL) firstIndexFree++;
     move (game->nodes[firstIndexFree]);
 
     if(type==PSY){
-        // TODO respawn
+        game->chooseRespawn((this->owner+1)%2, src);
     }
 }
 
 void Marble::updateAccessibleNodes () {
-
+    if(node->index == 34){
+        cout << "hello" << endl;
+    }
     accessibleNodes.clear ();
     bool semi_paralysis = false;
     for (int i=0; i<6; i+=2){
@@ -186,7 +189,7 @@ void Marble::updateAccessibleNodes () {
             for (int j=0; j<node->dirPaths[i].size(); j++) {
                 Marble *m = node->dirPaths[i][j]->marble ;
                 if (m == NULL){
-                    if(!marbleEncountered){
+                    if(!marbleEncountered && !semi_paralysis){
                         accessibleNodes.push_back(node->dirPaths[i][j]);
                         thisPathAccessibleNodes.push_back(node->dirPaths[i][j]);
                     }
@@ -194,7 +197,7 @@ void Marble::updateAccessibleNodes () {
                 else if(m->owner != this->owner)
                     causeParalysis = true;
                 else
-                    cureParalysis = false;
+                    cureParalysis = true;
             }
         }
         if(!node->dirPaths[i+1].empty()){
@@ -202,7 +205,7 @@ void Marble::updateAccessibleNodes () {
             for (int j=0; j<node->dirPaths[i+1].size(); j++) {
                 Marble *m = node->dirPaths[i+1][j]->marble ;
                 if (m == NULL){
-                    if(!marbleEncountered){
+                    if(!marbleEncountered && !semi_paralysis){
                         thisPathAccessibleNodes.push_back(node->dirPaths[i+1][j]);
                         accessibleNodes.push_back(node->dirPaths[i+1][j]);
                     }
@@ -210,7 +213,7 @@ void Marble::updateAccessibleNodes () {
                 else if(m->owner != this->owner)
                     causeParalysis = true;
                 else
-                    cureParalysis = false;
+                    cureParalysis = true;
             }
         }
         if(semi_paralysis && (causeParalysis && !cureParalysis)){

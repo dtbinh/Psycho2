@@ -31,7 +31,7 @@ Game::Game()
     //updateGUI (CURPOSFILE); marbles[0][7]->kill(); marbles[1][3]->kill();
     //for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) marbles[j][i]->display (false, true);
     //updateGUI (CURPOSFILE);
-    //for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) { marbles[j][i]->updateAccessibleNodes (); marbles[j][i]->display (true, true);}
+    for (int j=0; j<2; j++) for (int i=0; i<NBMARBLES; i++) { marbles[j][i]->updateAccessibleNodes (); marbles[j][i]->display (true, true);}
 }
 
 
@@ -106,6 +106,38 @@ void Game::updateGUI (string positionsFile) {
     }
     
     else warningMsg ("couldn't open file " + positionsFile);
+}
+
+void Game::chooseRespawn(int player, Node* dst){
+    if(player==0){
+        float nbINFMort = 0;
+        float nbDELMort = 0;
+        Marble* anINF = NULL;
+        Marble* aDEL = NULL;
+        for(int i = 0; i < NBMARBLES; i++){
+            if(!marbles[player][i]->isAlive()){
+                switch(marbles[player][i]->type){
+                case INF:
+                    nbINFMort++;
+                    anINF = marbles[player][i];
+                    break;
+                case DEL:
+                    nbDELMort++;
+                    aDEL = marbles[player][i];
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+        if(nbINFMort/6 > nbDELMort/4){
+            anINF->move(dst);
+        }else if(aDEL != NULL){
+            aDEL->move(dst);
+        }
+    }else{
+        // TODO player's choice
+    }
 }
 
 void Game::setBoard(Tree * t){
