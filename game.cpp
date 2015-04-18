@@ -70,7 +70,6 @@ void Game::initBoard (string pathsFile) {
 
 
 void Game::initMatch (string openingFile, int turn) {
-
     // create marbles
     ifstream file;
     file.open (openingFile.c_str(), ios::in);
@@ -202,10 +201,12 @@ void Game::runMinimax () {
 
 /* TESTS */
 
-void Game::generateGames(int nbGames, bool alive){
+void Game::generateGames(int nbGames, int nbDead, int nbBorder){
     bool alreadyMarble;
     int type;
     int rdm;
+    int currDead, currBorder;
+    currDead = currBorder = 0;
     double average = 0.0;
     double variance = 0.0;
     int possibilities[nbGames];
@@ -227,12 +228,7 @@ void Game::generateGames(int nbGames, bool alive){
             for(int i = 0 ; i < NBMARBLES ; i++){
                 alreadyMarble = true;
                 while(alreadyMarble){
-                    if(!alive){
-                        rdm = rand() % BOARDSIZE;
-                    }
-                    else{
-                        rdm = rand() % NBNODES;
-                    }
+                    rdm = rand() % NBNODES;
                     alreadyMarble = (nodes[rdm]->marble != NULL);
                     //if(alreadyMarble) cout << "                          Aie " << n << "    " << rdm << "          \r";
                 }
@@ -241,7 +237,7 @@ void Game::generateGames(int nbGames, bool alive){
                 else if(i < 12) type = PSY;
                 else type = PKP;
 
-                marbles[p][i] = new Marble (this, nodes[rdm], type, 0);
+                marbles[p][i] = new Marble (this, nodes[rdm], type, 0);                
             }
         }
         //Update marbles on path
@@ -249,10 +245,44 @@ void Game::generateGames(int nbGames, bool alive){
             paths[i]->updateMarbles();
         }
 
+        // Move some marbles to border
+        for(int p = 0 ; p < 2 ; p++){
+            for(int i = 0 ; i < NBMARBLES ; i++){
+                for(int path = 0 ; path < 3 ; path++){
+                    if(marbles[p][i]->node->paths[path] != NULL){
+                        if(marbles[p][i]->node->paths[path]->isBorder){
+                            currBorder++;
+                        }
+                        else{
+                            if(currBorder < nbBorder){
+                                rdm = rand() % 48;
+                                marbles[p][i]->move(nodes[rdm]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Check for kills
         for(int p = 0 ; p < 2 ; p++){
             for(int i = 0 ; i < NBMARBLES ; i++){
-                if(marbles[p][i]->isCaptured())marbles[p][i]->kill();
+                if(marbles[p][i]->isCaptured()){
+                    marbles[p][i]->kill();
+                    currDead++;
+                }
+            }
+        }
+
+        // Kill some marbles
+        for(int p = 0 ; p < 2 ; p++){
+            for(int i = 0 ; i < NBMARBLES ; i++){
+                if(marbles[p][i]->isAlive()){
+                    if(currDead < nbDead){
+                        marbles[p][i]->kill();
+                        currDead++;
+                    }
+                }
             }
         }
 

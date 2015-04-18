@@ -43,7 +43,7 @@ public:
     void runMinimax();
 
     /* Tests */
-    void generateGames(int nbGames, bool alive);
+    void generateGames(int nbGames, int nbDead, int nbBorder);
 };
 
 #endif
