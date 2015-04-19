@@ -209,7 +209,7 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
     currDead = currBorder = 0;
     double average = 0.0;
     double variance = 0.0;
-    int possibilities[nbGames];
+    double possibilities[nbGames];
 
     initBoard (PATHSFILE);    // creating nodes and paths
     srand (time(NULL)); //Setting the seed for random number generator
@@ -219,7 +219,7 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
     // Placing randomly marbles
     for(int n = 0 ; n < nbGames ; n++){
         //cout << "Generation game " << n << "                  \r";
-
+        currDead = currBorder = 0;
         // Empty the board
         for(int nId = 0 ; nId < BOARDSIZE ; nId++) nodes[nId]->marble = NULL;
 
@@ -245,25 +245,6 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
             paths[i]->updateMarbles();
         }
 
-        // Move some marbles to border
-        for(int p = 0 ; p < 2 ; p++){
-            for(int i = 0 ; i < NBMARBLES ; i++){
-                for(int path = 0 ; path < 3 ; path++){
-                    if(marbles[p][i]->node->paths[path] != NULL){
-                        if(marbles[p][i]->node->paths[path]->isBorder){
-                            currBorder++;
-                        }
-                        else{
-                            if(currBorder < nbBorder){
-                                rdm = rand() % 48;
-                                marbles[p][i]->move(nodes[rdm]);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         // Check for kills
         for(int p = 0 ; p < 2 ; p++){
             for(int i = 0 ; i < NBMARBLES ; i++){
@@ -286,7 +267,47 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
             }
         }
 
-        int totalpossibilities = 0;
+        // Move some marbles to border
+        for(int p = 0 ; p < 2 ; p++){
+            for(int i = 0 ; i < NBMARBLES ; i++){
+                for(int path = 0 ; path < 3 ; path++){
+                    alreadyMarble = true;
+                    while(alreadyMarble){
+                        rdm = rand() % 48;
+                        alreadyMarble = (paths[0]->nodes[rdm]->marble != NULL);
+
+                        if(marbles[p][i]->node->paths[path] != NULL){
+                            if(marbles[p][i]->node->paths[path]->isBorder){
+                                currBorder++;
+                            }
+                            else{
+                                if(currBorder < nbBorder && !alreadyMarble){
+                                    marbles[p][i]->move(paths[0]->nodes[rdm]);
+                                    currBorder++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check for kills
+        for(int p = 0 ; p < 2 ; p++){
+            for(int i = 0 ; i < NBMARBLES ; i++){
+                if(marbles[p][i]->isCaptured()){
+                    marbles[p][i]->kill();
+                    currDead++;
+                }
+            }
+        }
+
+        //Update marbles on path
+        for(int i = 0; i < NBPATHS; i++){
+            paths[i]->updateMarbles();
+        }
+
+        double totalpossibilities = 0.0;
         // Compute possibilities
         for(int p = 0 ; p < 2 ; p++){
             for(int i = 0 ; i < NBMARBLES ; i++){
@@ -294,18 +315,18 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
                 totalpossibilities+=marbles[p][i]->accessibleNodes.size();
             }
         }
-        possibilities[n] = totalpossibilities / 2;
-        average += totalpossibilities / 2;
+        possibilities[n] = totalpossibilities / 2.0;
+        average += totalpossibilities / 2.0;
     }
 
-    average /= nbGames;
+    average /= (double)nbGames;
     cout << endl << endl << "Moyenne : " << average << endl;
 
     // calcul ecart type
     for(int n = 0 ; n < nbGames ; n++){
         variance += pow(possibilities[n] - average, 2.0);
     }
-    variance = 1.0/nbGames * variance;
+    variance = 1.0/(double)nbGames * variance;
 
     cout << endl << "Ecart type : " << sqrt(variance) << endl;
 
