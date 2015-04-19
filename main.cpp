@@ -4,13 +4,13 @@
 int main()
 {
    Game *game = new Game();
+   cout << game->runMinimaxAlphaBeta(NULL, 10, INT_MIN, INT_MAX, true) << endl;
    //game->runMinimax();
-   for(int i = 0 ; i < 16 ; i+=5){
-       for(int j = 0 ; j < 16 ; j+=5){
-            cout << "morts = " << i << " bord = " << j << endl;
-            game->generateGames(1000, i, j);
-       }
+   /*
+   for(int i = 0 ; i < 15 ; i++){
+    game->generateGames(1000, i, 10);
    }
-
+   */
+   
    return 0;
 }

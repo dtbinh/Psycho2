@@ -46,7 +46,7 @@ void Game::initBoard (string pathsFile) {
     file.open (pathsFile.c_str(), ios::in);
     vector<int> nodeIdxList;
     int currentPathidx = 0;
-    int tmpIdx;    
+    int tmpIdx;
 
     if (file) {
         string line;
@@ -141,7 +141,7 @@ void Game::chooseRespawn(int player, Node* dst){
 }
 
 void Game::setBoard(Tree * t){
-    for(int i = 0; i < NBNODES; i++) this->nodes[i]->marble = NULL;
+    for(int i = 0; i < BOARDSIZE; i++) this->nodes[i]->marble = NULL;
     for(int i = 0; i < 2; i++){
         for(int j = 0; j < NBMARBLES; j++){
             this->nodes[t->marblesPositions[i][j]]->marble = this->marbles[i][j];
@@ -176,6 +176,9 @@ void Game::runMinimax () {
 
     while(!list.empty() && time(0) < beginning + TIMEOUT){
         Tree* currentTree = list[listCpt];
+        if(listCpt == 134){
+            cout << "hello" << endl;
+        }
         this->setBoard(currentTree);
         for(int j = 0; j < NBMARBLES; j++){
             Marble* m = marbles[currentTree->depth % 2][j];
@@ -197,6 +200,52 @@ void Game::runMinimax () {
         listCpt++;
     }
     cout << "Meilleur score : " << bestScore << endl;
+}
+
+int Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta, bool maximizingPlayer) {
+    if(currentNode == NULL){
+        currentNode = new Tree(this, NULL);
+    }
+    currentNode->displayConsole();
+    if(depth == 0){
+        return this->eval(0);
+    }
+    if(maximizingPlayer){
+        int v = INT_MIN;
+        this->setBoard(currentNode);
+        for(int j = 0; j < NBMARBLES; j++){
+            Marble* m = marbles[currentNode->depth % 2][j];
+            m->updateAccessibleNodes();
+            for(int k = 0; k < m->accessibleNodes.size(); k++){
+                m->move(m->accessibleNodes[k]);
+                Tree* son = new Tree(this, currentNode);
+                currentNode->addNewSon(son);
+                v = max(v, runMinimaxAlphaBeta(son, depth-1, alpha, beta, false));
+                alpha = max(alpha, v);
+                if(beta <= alpha)
+                    break;
+                this->setBoard(currentNode);
+            }
+        }
+        return v;
+    }else{
+        int v = INT_MAX;
+        this->setBoard(currentNode);
+        for(int j = 0; j < NBMARBLES; j++){
+            Marble* m = marbles[currentNode->depth % 2][j];
+            m->updateAccessibleNodes();
+            for(int k = 0; k < m->accessibleNodes.size(); k++){
+                m->move(m->accessibleNodes[k]);
+                Tree* son = new Tree(this, currentNode);
+                currentNode->addNewSon(son);
+                v = min(v, runMinimaxAlphaBeta(son, depth-1, alpha, beta, false));
+                beta = min(alpha, v);
+                if(beta <= alpha)
+                    break;
+                this->setBoard(currentNode);
+            }
+        }
+    }
 }
 
 /* TESTS */
@@ -237,7 +286,7 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
                 else if(i < 12) type = PSY;
                 else type = PKP;
 
-                marbles[p][i] = new Marble (this, nodes[rdm], type, 0);                
+                marbles[p][i] = new Marble (this, nodes[rdm], type, 0);
             }
         }
         //Update marbles on path
