@@ -156,7 +156,8 @@ int Game::eval (int player) {
     int evaluation = 0;
     for(int i = 0; i < 2; i++)
         for(int j = 0; j < NBMARBLES; j++)
-            if(!marbles[i][j]->isAlive()) evaluation = (i == player) ? evaluation-1 : evaluation+1;
+            int value = (marbles[i][j]->type) == INF ? 2 : (marbles[i][j]->type == DEL) ? 3 : (marbles[i][j]->type == PSY) ? 5 : 100000;
+            if(!marbles[i][j]->isAlive()) evaluation = (i == player) ? evaluation-value : evaluation+value;
 
     return evaluation;
 }
@@ -210,6 +211,7 @@ int Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta
     if(depth == 0){
         return this->eval(0);
     }
+    bool out = false;
     if(maximizingPlayer){
         int v = INT_MIN;
         this->setBoard(currentNode);
@@ -222,10 +224,14 @@ int Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta
                 currentNode->addNewSon(son);
                 v = max(v, runMinimaxAlphaBeta(son, depth-1, alpha, beta, false));
                 alpha = max(alpha, v);
-                if(beta <= alpha)
+                if(beta <= alpha){
+                    out = true;
                     break;
+                }
                 this->setBoard(currentNode);
             }
+            if(out)
+                break;
         }
         return v;
     }else{
@@ -240,10 +246,14 @@ int Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta
                 currentNode->addNewSon(son);
                 v = min(v, runMinimaxAlphaBeta(son, depth-1, alpha, beta, false));
                 beta = min(alpha, v);
-                if(beta <= alpha)
+                if(beta <= alpha){
+                    out = true;
                     break;
+                }
                 this->setBoard(currentNode);
             }
+            if(out)
+                break;
         }
     }
 }
