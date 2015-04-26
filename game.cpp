@@ -1,6 +1,7 @@
 #include "game.h"
 #include <ctime>
 #include <cmath>
+#include <cstdlib>
 
 extern const int NBNODES (163);
 extern const int NBPATHS (28);
@@ -154,12 +155,11 @@ void Game::setBoard(Tree * t){
 
 int Game::eval (int player) {
     int evaluation = 0;
-    for(int i = 0; i < 2; i++){
-        for(int j = 0; j < NBMARBLES; j++){
+    for(int i = 0; i < 2; i++)
+        for(int j = 0; j < NBMARBLES; j++)
             int value = (marbles[i][j]->type) == INF ? 2 : (marbles[i][j]->type == DEL) ? 3 : (marbles[i][j]->type == PSY) ? 5 : 100000;
             if(!marbles[i][j]->isAlive()) evaluation = (i == player) ? evaluation-value : evaluation+value;
-        }
-    }
+
     return evaluation;
 }
 
@@ -259,23 +259,17 @@ int Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta
     }
 }
 
-/**
- * @brief Game::randomMove affect randomly a source marble and a random valid destination node.
- * @param src source marble
- * @param dst destination node
- * @param player player concerned
- */
-void Game::randomMove(Marble *src, Node *dst, int player){
-    int rdm;
 
-    srand(time(NULL));
-    rdm = rand() % NBMARBLES;
-
-    src = marbles[player][rdm];
-
-    vector<Node *> v = src->accessibleNodes;
-    rdm = rand() % v.size();
-    dst = v.at(rdm);
+bool Game::nextTurn(){
+    if(!whosTurn){
+        this->runMinimaxAlphaBeta(NULL, 7, INT_MIN, INT_MAX, true);
+    }else{
+        int marble = rand() % NBMARBLES;
+        while(marbles[whosTurn][marble]->accessibleNodes.empty()) marble = rand() % NBMARBLES;
+        int move = rand() % marbles[whosTurn][marble]->accessibleNodes.size();
+        marbles[whosTurn][marble]->move(marbles[whosTurn][marble]->accessibleNodes[move]);
+    }
+    whosTurn = (whosTurn+1) % 2;
 }
 
 /* TESTS */
