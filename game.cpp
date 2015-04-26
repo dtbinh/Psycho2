@@ -156,9 +156,10 @@ void Game::setBoard(Tree * t){
 int Game::eval (int player) {
     int evaluation = 0;
     for(int i = 0; i < 2; i++)
-        for(int j = 0; j < NBMARBLES; j++)
+        for(int j = 0; j < NBMARBLES; j++){
             int value = (marbles[i][j]->type) == INF ? 2 : (marbles[i][j]->type == DEL) ? 3 : (marbles[i][j]->type == PSY) ? 5 : 100000;
             if(!marbles[i][j]->isAlive()) evaluation = (i == player) ? evaluation-value : evaluation+value;
+        }
 
     return evaluation;
 }
