@@ -260,6 +260,25 @@ int Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta
 }
 
 
+/**
+ * @brief Game::randomMove affect randomly a source marble and a random valid destination node.
+ * @param src source marble
+ * @param dst destination node
+ * @param player player concerned
+ */
+void Game::randomMove(Marble *src, Node *dst, int player){
+    int rdm;
+
+    srand(time(NULL));
+    rdm = rand() % NBMARBLES;
+
+    src = marbles[player][rdm];
+
+    vector<Node *> v = src->accessibleNodes;
+    rdm = rand() % v.size();
+    dst = v.at(rdm);
+}
+
 bool Game::nextTurn(){
     if(!whosTurn){
         this->runMinimaxAlphaBeta(NULL, 7, INT_MIN, INT_MAX, true);
