@@ -1,6 +1,7 @@
 #include "game.h"
 #include <ctime>
 #include <cmath>
+#include <cstdlib>
 
 extern const int NBNODES (163);
 extern const int NBPATHS (28);
@@ -256,6 +257,19 @@ int Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta
                 break;
         }
     }
+}
+
+
+bool Game::nextTurn(){
+    if(!whosTurn){
+        this->runMinimaxAlphaBeta(NULL, 7, INT_MIN, INT_MAX, true);
+    }else{
+        int marble = rand() % NBMARBLES;
+        while(marbles[whosTurn][marble]->accessibleNodes.empty()) marble = rand() % NBMARBLES;
+        int move = rand() % marbles[whosTurn][marble]->accessibleNodes.size();
+        marbles[whosTurn][marble]->move(marbles[whosTurn][marble]->accessibleNodes[move]);
+    }
+    whosTurn = (whosTurn+1) % 2;
 }
 
 /* TESTS */
