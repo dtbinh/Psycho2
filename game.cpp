@@ -154,11 +154,12 @@ void Game::setBoard(Tree * t){
 
 int Game::eval (int player) {
     int evaluation = 0;
-    for(int i = 0; i < 2; i++)
-        for(int j = 0; j < NBMARBLES; j++)
+    for(int i = 0; i < 2; i++){
+        for(int j = 0; j < NBMARBLES; j++){
             int value = (marbles[i][j]->type) == INF ? 2 : (marbles[i][j]->type == DEL) ? 3 : (marbles[i][j]->type == PSY) ? 5 : 100000;
             if(!marbles[i][j]->isAlive()) evaluation = (i == player) ? evaluation-value : evaluation+value;
-
+        }
+    }
     return evaluation;
 }
 
@@ -256,6 +257,25 @@ int Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta
                 break;
         }
     }
+}
+
+/**
+ * @brief Game::randomMove affect randomly a source marble and a random valid destination node.
+ * @param src source marble
+ * @param dst destination node
+ * @param player player concerned
+ */
+void Game::randomMove(Marble *src, Node *dst, int player){
+    int rdm;
+
+    srand(time(NULL));
+    rdm = rand() % NBMARBLES;
+
+    src = marbles[player][rdm];
+
+    vector<Node *> v = src->accessibleNodes;
+    rdm = rand() % v.size();
+    dst = v.at(rdm);
 }
 
 /* TESTS */

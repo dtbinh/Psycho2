@@ -42,6 +42,7 @@ public:
 
     void runMinimax();
     int runMinimaxAlphaBeta(Tree *currentNode, int depth, int alpha, int beta, bool maximizingPlayer);
+    void randomMove(Marble *src, Node *dst, int player);
 
     /* Tests */
     void generateGames(int nbGames, int nbDead, int nbBorder);
