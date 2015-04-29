@@ -24,3 +24,7 @@ void Tree::displayConsole () {
 	
     cout << "depth : " << depth << " score : " << score << "             \r";
 }
+
+Tree::~Tree(){
+
+}

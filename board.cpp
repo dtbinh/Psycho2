@@ -268,6 +268,13 @@ bool Marble::isCaptured(){
 
 bool Marble::isAlive(){ return this->node->index < NBNODES;}
 
+bool Marble::isOnBorder(){
+    for(int i = 0; i < 3; i++){
+        if(this->node->paths[i] != NULL && this->node->paths[i]->isBorder)
+            return true;
+    }
+}
+
 string Marble::type2str (MarbleType type) {
     return (type==PKP)?"psychopath":((type==PSY)?"psychologist":((type==INF)?"doctor":((type==DEL)?"informer":"unknown")));
 }

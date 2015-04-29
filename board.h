@@ -77,6 +77,7 @@ struct Marble {
     
     bool isCaptured();
     bool isAlive();
+    bool isOnBorder();
     void updateAccessibleNodes ();
     void move (Node *dst);
     void kill ();

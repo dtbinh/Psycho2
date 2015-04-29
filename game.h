@@ -24,7 +24,8 @@ private:
     
     Tree *minimax;
     int eval (int player);						// evaluation function used in minimax
-
+    void computePossibilities(int player);
+    bool pat();
 
 
 
@@ -45,6 +46,7 @@ public:
     void runMinimax();
     Tree* runMinimaxAlphaBeta(Tree *currentNode, int depth, int alpha, int beta, bool maximizingPlayer);
     void randomMove(Marble *src, Node *dst, int player);
+    int letTheBotFightBegin();
 
     /* Tests */
     void generateGames(int nbGames, int nbDead, int nbBorder);

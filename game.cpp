@@ -2,6 +2,7 @@
 #include <ctime>
 #include <cmath>
 #include <cstdlib>
+#include <unistd.h>
 
 extern const int NBNODES (163);
 extern const int NBPATHS (28);
@@ -155,10 +156,20 @@ void Game::setBoard(Tree * t){
 
 int Game::eval (int player) {
     int evaluation = 0;
-    for(int i = 0; i < 2; i++)
+    int nbDocOnBorder = 0;
+    for(int i = 0; i < 2; i++)        
         for(int j = 0; j < NBMARBLES; j++){
-            int value = (marbles[i][j]->type) == INF ? 2 : (marbles[i][j]->type == DEL) ? 3 : (marbles[i][j]->type == PSY) ? 5 : 100000;
+            int value = (marbles[i][j]->type) == INF ? 20 : (marbles[i][j]->type == DEL) ? 30 : (marbles[i][j]->type == PSY) ? 50 : 1000000;
             if(!marbles[i][j]->isAlive()) evaluation = (i == player) ? evaluation-value : evaluation+value;
+            else if (marbles[i][j]->isOnBorder() && marbles[i][j]->type == INF){ // handle border
+                nbDocOnBorder++;
+                if(nbDocOnBorder > 3){
+                    evaluation--;
+                }
+                else{
+                    evaluation++;
+                }
+            }
         }
 
     return evaluation;
@@ -209,29 +220,28 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
     if(currentNode == NULL){
         currentNode = new Tree(this, NULL);
     }
-    currentNode->displayConsole();
     if(depth == 0){
         currentNode->score = this->eval(0);
         return currentNode;
     }
     bool out = false;
     if(maximizingPlayer){
-        int v = INT_MIN;
+        currentNode->score = INT_MIN;
         Tree* keptSon;
         this->setBoard(currentNode);
         for(int j = 0; j < NBMARBLES; j++){
-            Marble* m = marbles[currentNode->depth % 2][j];
+            Marble* m = marbles[0][j];
             m->updateAccessibleNodes();
             for(int k = 0; k < m->accessibleNodes.size(); k++){
                 m->move(m->accessibleNodes[k]);
                 Tree* son = new Tree(this, currentNode);
                 currentNode->addNewSon(son);
-                runMinimaxAlphaBeta(son, depth-1, alpha, beta, false);
-                if(v < son->score){
-                    v = son->score;
+                son = runMinimaxAlphaBeta(son, depth-1, alpha, beta, false);
+                if(currentNode->score < son->score){
+                    currentNode->score = son->score;
                     keptSon = son;
                 }
-                alpha = max(alpha, v);
+                alpha = max(alpha, currentNode->score);
                 if(beta <= alpha){
                     out = true;
                     break;
@@ -243,22 +253,22 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
         }
         return keptSon;
     }else{
-        int v = INT_MAX;
+        currentNode->score = INT_MAX;
         Tree* keptSon;
         this->setBoard(currentNode);
         for(int j = 0; j < NBMARBLES; j++){
-            Marble* m = marbles[currentNode->depth % 2][j];
+            Marble* m = marbles[1][j];
             m->updateAccessibleNodes();
             for(int k = 0; k < m->accessibleNodes.size(); k++){
                 m->move(m->accessibleNodes[k]);
                 Tree* son = new Tree(this, currentNode);
                 currentNode->addNewSon(son);
                 runMinimaxAlphaBeta(son, depth-1, alpha, beta, false);
-                if(v > son->score){
-                    v = son->score;
-                    keptSon = v;
+                if(currentNode->score > son->score){
+                    currentNode->score = son->score;
+                    keptSon = son;
                 }
-                beta = min(alpha, v);
+                beta = min(alpha, currentNode->score);
                 if(beta <= alpha){
                     out = true;
                     break;
@@ -292,13 +302,62 @@ void Game::randomMove(Marble *src, Node *dst, int player){
     dst = v.at(rdm);
 }
 
+bool Game::pat(){
+    for(int i = 0 ; i < 2 ; i++){
+        int possMoves = 0;
+        for(int j = 0 ; j < NBMARBLES ; j++){
+            marbles[i][j]->updateAccessibleNodes();
+            possMoves += marbles[i][j]->accessibleNodes.size();
+        }
+        if(possMoves == 0){
+            //cout << "pat" << endl;
+            return true;
+        }
+    }
+    return false;
+}
+
+int Game::letTheBotFightBegin(){
+    Marble * psycho0;
+    Marble * psycho1;
+    for(int i = 0 ; i < 2 ; i++){
+        for(int j = 0 ; j < NBMARBLES ; j++){
+            if(marbles[i][j]->type == PKP){
+                if(i)
+                    psycho1 = marbles[i][j];
+                else
+                    psycho0 = marbles[i][j];
+            }
+        }
+    }
+    //updateGUI(CURPOSFILE);
+    int coups=0;
+    srand(time(NULL));
+
+    while(psycho1->isAlive() && psycho0->isAlive() && !pat()){
+        //cout << whosTurn << " joue. (" << coups << ")" << endl;
+        coups++;
+        usleep(1000);
+        nextTurn();
+       // updateGUI(CURPOSFILE);
+    }
+    return coups;
+}
+
+void Game::computePossibilities(int player){
+    for(int i = 0 ; i < NBMARBLES ; i++){
+        marbles[player][i]->updateAccessibleNodes();
+    }
+}
+
 bool Game::nextTurn(){
-    if(!whosTurn){
-        Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 7, INT_MIN, INT_MAX, true);
+    if(whosTurn == 0){
+        Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 20, INT_MIN, INT_MAX, true);
         this->setBoard(bestMove);
-    }else{
+    }else{        
+        computePossibilities(1);
         int marble = rand() % NBMARBLES;
-        while(marbles[whosTurn][marble]->accessibleNodes.empty()) marble = rand() % NBMARBLES;
+        while(marbles[whosTurn][marble]->accessibleNodes.empty()) marble = (marble + 1) % NBMARBLES;
         int move = rand() % marbles[whosTurn][marble]->accessibleNodes.size();
         marbles[whosTurn][marble]->move(marbles[whosTurn][marble]->accessibleNodes[move]);
     }
@@ -438,4 +497,10 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
 
 }
 
+Game::~Game(){
+    delete nodes;
+    delete paths;
+    delete marbles;
+    free(minimax);
+}
 
