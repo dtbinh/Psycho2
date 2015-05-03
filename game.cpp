@@ -155,23 +155,41 @@ void Game::setBoard(Tree * t){
 
 
 int Game::eval (int player) {
-    int evaluation = 0;
-    int nbDocOnBorder = 0;
-    for(int i = 0; i < 2; i++)        
+    int evaluation = 0;   
+    for(int i = 0; i < 2; i++){
+        int possibleMoves = 0;
+        int nbDocOnBorder = 0;
+        int valuePsycho = 1000000;
+        bool pkpAlive = true;
         for(int j = 0; j < NBMARBLES; j++){
-            int value = (marbles[i][j]->type) == INF ? 20 : (marbles[i][j]->type == DEL) ? 30 : (marbles[i][j]->type == PSY) ? 50 : 1000000;
-            if(!marbles[i][j]->isAlive()) evaluation = (i == player) ? evaluation-value : evaluation+value;
-            else if (marbles[i][j]->isOnBorder() && marbles[i][j]->type == INF){ // handle border
+            int value = (marbles[i][j]->type) == INF ? 20 : (marbles[i][j]->type == DEL) ? 30 : (marbles[i][j]->type == PSY) ? 50 : 0;
+            // Kill
+            if(!marbles[i][j]->isAlive()){
+                if(marbles[i][j]->type == PKP) pkpAlive = false;
+                evaluation = (i == player) ? evaluation-value : evaluation+value;
+            }
+            // Border
+            else if (marbles[i][j]->isOnBorder() && marbles[i][j]->type == INF){ // handle border                
                 nbDocOnBorder++;
                 if(nbDocOnBorder > 3){
-                    evaluation--;
+                    evaluation = (i == player) ? evaluation - 2 : evaluation + 2;
                 }
                 else{
-                    evaluation++;
+                    evaluation = (i == player) ? evaluation + 2 : evaluation - 2;
                 }
-            }
+            }                        
+            possibleMoves += marbles[i][j]->accessibleNodes.size();
         }
-
+        // standard deviation to include movement possibilites number
+        int sd = 15;
+        int mean = 190;
+        int value = (int)floor((possibleMoves - 190) / sd);
+        evaluation = (i == player) ? evaluation + value : evaluation - value;
+        // pkp
+        if(!pkpAlive){
+            evaluation = (i==player) ? -(valuePsycho - evaluation) : valuePsycho - evaluation;
+        }
+    }
     return evaluation;
 }
 
@@ -339,7 +357,7 @@ int Game::letTheBotFightBegin(){
         coups++;
         usleep(1000);
         nextTurn();
-       // updateGUI(CURPOSFILE);
+        updateGUI(CURPOSFILE);
     }
     return coups;
 }
