@@ -273,6 +273,7 @@ bool Marble::isOnBorder(){
         if(this->node->paths[i] != NULL && this->node->paths[i]->isBorder)
             return true;
     }
+    return false;
 }
 
 string Marble::type2str (MarbleType type) {
