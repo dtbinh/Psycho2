@@ -368,7 +368,7 @@ void Game::computePossibilities(int player){
     }
 }
 
-bool Game::nextTurn(){
+void Game::nextTurn(){
     if(whosTurn == 0){
         Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 20, INT_MIN, INT_MAX, true);
         this->setBoard(bestMove);
@@ -516,9 +516,9 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
 }
 
 Game::~Game(){
-    delete nodes;
-    delete paths;
-    delete marbles;
+    //delete nodes;
+    //delete paths;
+    //delete marbles;
     free(minimax);
 }
 
