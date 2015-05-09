@@ -21,8 +21,14 @@ void Tree::addNewSon (Tree *son) {
 void Tree::displayConsole () {
 
 	// !! not implemented !! //
-	
-    cout << "depth : " << depth << " score : " << score << "             \r";
+    for(int i = 0; i < 2; i++){
+        for(int j = 0; j < NBMARBLES; j++){
+            cout << marblesPositions[i][j] << endl;
+        }
+        cout << "_____________" << endl;
+    }
+
+    //cout << "depth : " << depth << " score : " << score << "             \r";
 }
 
 Tree::~Tree(){
