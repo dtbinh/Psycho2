@@ -38,15 +38,16 @@ public:
 	int whosTurn;								// 0: computer / 1: human
     void chooseRespawn(int player, Node* dst);
 
-    void nextTurn();
+    void nextTurn(int player0, int player1);
 	
     Game();
     ~Game();
 
     Tree* runMinimax(Tree *currentNode, int depth, bool maximizingPlayer);
-    Tree* runMinimaxAlphaBeta(Tree *currentNode, int depth, int alpha, int beta, bool maximizingPlayer);
+    Tree* runMinimaxAlphaBeta(Tree *currentNode, int depth, int alpha, int beta, bool maximizingPlayer, int whoIsMaximizing);
     void randomMove(Marble *src, Node *dst, int player);
-    int letTheBotFightBegin();
+    int letsplay(int player0, int player1);
+    void playerDoAMove(int player);
 
     /* Tests */
     void generateGames(int nbGames, int nbDead, int nbBorder);

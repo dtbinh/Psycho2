@@ -1,5 +1,6 @@
 #include "game.h"
 
+#include <unistd.h>
 
 
 int main()
@@ -12,17 +13,29 @@ int main()
     game->generateGames(1000, i, 10);
    }
    */
+
+
     double coupsTot, moyenne;
+    int victoiresNoir;
+    int victoiresBlanc;
+    victoiresNoir = victoiresBlanc = 0;
     moyenne = coupsTot = 0.0;
-    for(int i = 0 ; i < 1 ; i++){
+    double parties = 1.0;
+    int cpt=0;
+    for(int i = 0 ; i < parties ; i++){
         cout << i << endl;
         game = new Game();
-        coupsTot += game->letTheBotFightBegin();
+        cpt = game->letsplay(HUMAN, RANDOM); // CHOOSE THE PLAYERS HERE. HUMAN CAN ONLY BE PLAYER WHITE
+        coupsTot+=abs(cpt);
+        if(cpt > 0) victoiresBlanc++;
+        else victoiresNoir++;
         //delete game;
     }
-    moyenne = coupsTot / 10.0;
+    moyenne = coupsTot / parties;
 
     cout << "moyenne = " << moyenne << endl;
-   
+    cout << "noir wins " << victoiresNoir << endl;
+    cout << "blanc wins " << victoiresBlanc << endl;
+
    return 0;
 }

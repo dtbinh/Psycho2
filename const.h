@@ -17,6 +17,11 @@ extern const bool VERBOSE;
 extern const bool GUI;
 extern const int TIMEOUT;
 
+extern const int ALPHABETA;
+extern const int HUMAN;
+extern const int RANDOM;
+extern const int BETTERRDM;
+
 static void warningMsg (string s) { cout << s << endl; }
 static void exitError (string s) { cout << s << endl; exit (EXIT_FAILURE); }
 

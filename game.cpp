@@ -19,6 +19,11 @@ extern const bool VERBOSE (true);
 extern const bool GUI (false);
 extern const int TIMEOUT (60);
 
+extern const int ALPHABETA (01);
+extern const int HUMAN (02);
+extern const int RANDOM (03);
+extern const int BETTERRDM (04);
+
 
 
 Game::Game()
@@ -253,12 +258,12 @@ Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
     }
 }
 
-Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta, bool maximizingPlayer) {
+Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta, bool maximizingPlayer, int whoIsMaximizing) {
     if(currentNode == NULL){
         currentNode = new Tree(this, NULL);
     }
     if(depth == 0){
-        currentNode->score = this->eval(0);
+        currentNode->score = this->eval(whoIsMaximizing);
         return currentNode;
     }
     if(maximizingPlayer){
@@ -266,13 +271,13 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
         Tree* keptSon;
         this->setBoard(currentNode);
         for(int j = 0; j < NBMARBLES; j++){
-            Marble* m = marbles[0][j];
+            Marble* m = marbles[whoIsMaximizing][j];
             m->updateAccessibleNodes();
             for(int k = 0; k < m->accessibleNodes.size(); k++){
                 m->move(m->accessibleNodes[k]);
                 Tree* son = new Tree(this, currentNode);
                 currentNode->addNewSon(son);
-                runMinimaxAlphaBeta(son, depth-1, alpha, beta, false);
+                runMinimaxAlphaBeta(son, depth-1, alpha, beta, false, whoIsMaximizing);
                 if(currentNode->score < son->score){
                     currentNode->score = son->score;
                     keptSon = son;
@@ -291,13 +296,13 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
         Tree* keptSon;
         this->setBoard(currentNode);
         for(int j = 0; j < NBMARBLES; j++){
-            Marble* m = marbles[1][j];
+            Marble* m = marbles[(whoIsMaximizing+1)%2][j];
             m->updateAccessibleNodes();
             for(int k = 0; k < m->accessibleNodes.size(); k++){
                 m->move(m->accessibleNodes[k]);
                 Tree* son = new Tree(this, currentNode);
                 currentNode->addNewSon(son);
-                runMinimaxAlphaBeta(son, depth-1, alpha, beta, true);
+                runMinimaxAlphaBeta(son, depth-1, alpha, beta, true, whoIsMaximizing);
                 if(currentNode->score > son->score){
                     currentNode->score = son->score;
                     keptSon = son;
@@ -312,26 +317,6 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
         }
         return keptSon;
     }
-}
-
-
-/**
- * @brief Game::randomMove affect randomly a source marble and a random valid destination node.
- * @param src source marble
- * @param dst destination node
- * @param player player concerned
- */
-void Game::randomMove(Marble *src, Node *dst, int player){
-    int rdm;
-
-    srand(time(NULL));
-    rdm = rand() % NBMARBLES;
-
-    src = marbles[player][rdm];
-
-    vector<Node *> v = src->accessibleNodes;
-    rdm = rand() % v.size();
-    dst = v.at(rdm);
 }
 
 bool Game::pat(){
@@ -349,7 +334,7 @@ bool Game::pat(){
     return false;
 }
 
-int Game::letTheBotFightBegin(){
+int Game::letsplay(int player0, int player1){
     Marble * psycho0;
     Marble * psycho1;
     for(int i = 0 ; i < 2 ; i++){
@@ -367,13 +352,14 @@ int Game::letTheBotFightBegin(){
     srand(time(NULL));
 
     while(psycho1->isAlive() && psycho0->isAlive() && !pat()){
-        //cout << whosTurn << " joue. (" << coups << ")" << endl;
         coups++;
-        sleep(1);
-        nextTurn();
+        nextTurn(player0, player1);
         updateGUI(CURPOSFILE);
     }
-    return coups;
+    if(psycho0->isAlive()){
+        return coups;
+    }
+    else return -coups;
 }
 
 void Game::computePossibilities(int player){
@@ -382,18 +368,71 @@ void Game::computePossibilities(int player){
     }
 }
 
-void Game::nextTurn(){
-    if(whosTurn == 0){
-        Tree* bestMove = this->runMinimax(NULL, 3, true);
-        bestMove->displayConsole();
-        sleep(1);
-        this->setBoard(bestMove);
-    }else{
+void Game::playerDoAMove(int player){
+    switch(player){
+    case HUMAN:
+    {
+        ifstream file;
+        file.open (CURPOSFILE.c_str(), ios::in);
+
+        int player[NBMARBLES*2];
+        int idNode[NBMARBLES*2];
+        int type[NBMARBLES*2];
+
+        int currentP;
+        int currentI;
+        int currentT;
+
+        int cpt=0;
+        while (file >> player[cpt] >> idNode[cpt] >>type[cpt])cpt++;
+
+        file.close();
+
+        bool guiChanged = false;
+        while(!guiChanged){
+            file.open (CURPOSFILE.c_str(), ios::in);
+            cpt=0;
+            while(file >> currentP >> currentI >> currentT){
+              if((player[cpt] != currentP || idNode[cpt] != currentI || type[cpt] != currentT) && currentI != 183){
+                  guiChanged = true;
+                  cout << "Mouvement de " << idNode[cpt] << " vers " << currentI << endl;
+                  marbles[whosTurn][cpt]->move(nodes[currentI]);
+              }
+              cpt++;
+            }
+            file.close();
+            sleep(1); // We wait a bit before refreshing
+        }
+        break;
+    }
+    case RANDOM:
+    {
         computePossibilities(1);
         int marble = rand() % NBMARBLES;
         while(marbles[whosTurn][marble]->accessibleNodes.empty()) marble = (marble + 1) % NBMARBLES;
         int move = rand() % marbles[whosTurn][marble]->accessibleNodes.size();
         marbles[whosTurn][marble]->move(marbles[whosTurn][marble]->accessibleNodes[move]);
+        break;
+    }
+    case ALPHABETA:
+    {
+        Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 3, INT_MIN, INT_MAX, true, whosTurn);
+        this->setBoard(bestMove);
+        break;
+    }
+    case BETTERRDM:
+        break;
+    }
+
+
+}
+
+
+void Game::nextTurn(int player0, int player1){
+    if(whosTurn == 0){
+        playerDoAMove(player0);
+    }else{
+        playerDoAMove(player1);
     }
     whosTurn = (whosTurn+1) % 2;
 }
