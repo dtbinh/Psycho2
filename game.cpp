@@ -156,7 +156,7 @@ void Game::setBoard(Tree * t){
 
 
 int Game::eval (int player) {
-    int evaluation = 0;   
+    int evaluation = 0;
     for(int i = 0; i < 2; i++){
         int possibleMoves = 0;
         int nbDocOnBorder = 0;
@@ -170,7 +170,7 @@ int Game::eval (int player) {
                 evaluation = (i == player) ? evaluation-value : evaluation+value;
             }
             // Border
-            else if (marbles[i][j]->isOnBorder() && marbles[i][j]->type == INF){ // handle border                
+            else if (marbles[i][j]->isOnBorder() && marbles[i][j]->type == INF){ // handle border
                 nbDocOnBorder++;
                 if(nbDocOnBorder > 3){
                     evaluation = (i == player) ? evaluation - 2 : evaluation + 2;
@@ -178,17 +178,17 @@ int Game::eval (int player) {
                 else{
                     evaluation = (i == player) ? evaluation + 2 : evaluation - 2;
                 }
-            }                        
+            }
             possibleMoves += marbles[i][j]->accessibleNodes.size();
         }
         // standard deviation to include movement possibilites number
         int sd = 15;
         int mean = 190;
-        int value = (int)floor((possibleMoves - 190) / sd);
+        int value = (int)floor((possibleMoves - mean) / sd);
         evaluation = (i == player) ? evaluation + value : evaluation - value;
         // pkp
         if(!pkpAlive){
-            evaluation = (i==player) ? -(valuePsycho - evaluation) : valuePsycho - evaluation;
+            evaluation = (i==player) ? INT_MIN : INT_MAX;
         }
     }
     return evaluation;
@@ -207,14 +207,18 @@ Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
         currentNode->score = INT_MIN;
         Tree* keptSon;
         this->setBoard(currentNode);
+        // Sons of currentNode
         for(int j = 0; j < NBMARBLES; j++){
+            if(j == 0){
+                cout << "pb" << endl;
+            }
             Marble* m = marbles[0][j];
             m->updateAccessibleNodes();
             for(int k = 0; k < m->accessibleNodes.size(); k++){
                 m->move(m->accessibleNodes[k]);
                 Tree* son = new Tree(this, currentNode);
                 currentNode->addNewSon(son);
-                son = runMinimax(son, depth-1, false);
+                runMinimax(son, depth-1, false);
                 if(currentNode->score < son->score){
                     currentNode->score = son->score;
                     keptSon = son;
@@ -222,6 +226,8 @@ Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
                 this->setBoard(currentNode);
             }
         }
+
+        return keptSon;
     }else{
         currentNode->score = INT_MAX;
         Tree* keptSon;
@@ -253,7 +259,6 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
         currentNode->score = this->eval(0);
         return currentNode;
     }
-    bool out = false;
     if(maximizingPlayer){
         currentNode->score = INT_MIN;
         Tree* keptSon;
@@ -265,20 +270,17 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
                 m->move(m->accessibleNodes[k]);
                 Tree* son = new Tree(this, currentNode);
                 currentNode->addNewSon(son);
-                son = runMinimaxAlphaBeta(son, depth-1, alpha, beta, false);
+                runMinimaxAlphaBeta(son, depth-1, alpha, beta, false);
                 if(currentNode->score < son->score){
                     currentNode->score = son->score;
                     keptSon = son;
                 }
                 alpha = max(alpha, currentNode->score);
                 if(beta <= alpha){
-                    out = true;
-                    break;
+                    return keptSon;
                 }
                 this->setBoard(currentNode);
             }
-            if(out)
-                break;
         }
         return keptSon;
     }else{
@@ -297,15 +299,12 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
                     currentNode->score = son->score;
                     keptSon = son;
                 }
-                beta = min(alpha, currentNode->score);
+                beta = min(beta, currentNode->score);
                 if(beta <= alpha){
-                    out = true;
-                    break;
+                    return keptSon;
                 }
                 this->setBoard(currentNode);
             }
-            if(out)
-                break;
         }
         return keptSon;
     }
@@ -359,14 +358,14 @@ int Game::letTheBotFightBegin(){
             }
         }
     }
-    //updateGUI(CURPOSFILE);
+    updateGUI(CURPOSFILE);
     int coups=0;
     srand(time(NULL));
 
     while(psycho1->isAlive() && psycho0->isAlive() && !pat()){
         //cout << whosTurn << " joue. (" << coups << ")" << endl;
         coups++;
-        usleep(1000);
+        sleep(1);
         nextTurn();
         updateGUI(CURPOSFILE);
     }
@@ -381,9 +380,11 @@ void Game::computePossibilities(int player){
 
 bool Game::nextTurn(){
     if(whosTurn == 0){
-        Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 20, INT_MIN, INT_MAX, true);
+        Tree* bestMove = this->runMinimax(NULL, 3, true);
+        bestMove->displayConsole();
+        sleep(1);
         this->setBoard(bestMove);
-    }else{        
+    }else{
         computePossibilities(1);
         int marble = rand() % NBMARBLES;
         while(marbles[whosTurn][marble]->accessibleNodes.empty()) marble = (marble + 1) % NBMARBLES;

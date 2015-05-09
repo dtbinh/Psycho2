@@ -14,7 +14,6 @@ class Tree
 
 private:
 
-    Tree *father;
     vector<Tree*> sons;
     
 	Game *game;							// reference to Game is needed to access the board and marbles
@@ -23,7 +22,8 @@ private:
     Tree *bestSon;
         
 public:
-    
+    Tree *father;
+
     int score;
     int depth;
     int marblesPositions[2][13];		// saving in each node the current positions of the marbles
