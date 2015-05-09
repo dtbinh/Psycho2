@@ -209,7 +209,7 @@ Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
         this->setBoard(currentNode);
         // Sons of currentNode
         for(int j = 0; j < NBMARBLES; j++){
-            if(j == 0){
+            if(j == 1 && depth == 3){
                 cout << "pb" << endl;
             }
             Marble* m = marbles[0][j];
@@ -224,6 +224,7 @@ Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
                     keptSon = son;
                 }
                 this->setBoard(currentNode);
+                m->updateAccessibleNodes();
             }
         }
 
@@ -245,6 +246,7 @@ Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
                     keptSon = son;
                 }
                 this->setBoard(currentNode);
+                m->updateAccessibleNodes();
             }
         }
         return keptSon;
@@ -280,6 +282,7 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
                     return keptSon;
                 }
                 this->setBoard(currentNode);
+                m->updateAccessibleNodes();
             }
         }
         return keptSon;
@@ -304,6 +307,7 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
                     return keptSon;
                 }
                 this->setBoard(currentNode);
+                m->updateAccessibleNodes();
             }
         }
         return keptSon;
