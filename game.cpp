@@ -355,7 +355,7 @@ int Game::letTheBotFightBegin(){
     while(psycho1->isAlive() && psycho0->isAlive() && !pat()){
         //cout << whosTurn << " joue. (" << coups << ")" << endl;
         coups++;
-        usleep(1000);
+        sleep(1);
         nextTurn();
         updateGUI(CURPOSFILE);
     }

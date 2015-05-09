@@ -14,7 +14,7 @@ int main()
    */
     double coupsTot, moyenne;
     moyenne = coupsTot = 0.0;
-    for(int i = 0 ; i < 10 ; i++){
+    for(int i = 0 ; i < 1 ; i++){
         cout << i << endl;
         game = new Game();
         coupsTot += game->letTheBotFightBegin();
