@@ -38,7 +38,7 @@ public:
 	int whosTurn;								// 0: computer / 1: human
     void chooseRespawn(int player, Node* dst);
 
-    bool nextTurn();
+    void nextTurn();
 	
     Game();
     ~Game();

@@ -18,7 +18,7 @@ int main()
         cout << i << endl;
         game = new Game();
         coupsTot += game->letTheBotFightBegin();
-        delete game;
+        //delete game;
     }
     moyenne = coupsTot / 10.0;
 
