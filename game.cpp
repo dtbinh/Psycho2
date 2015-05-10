@@ -417,8 +417,9 @@ void Game::playerDoAMove(int player){
     }
     case ALPHABETA:
     {
-        Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 3, INT_MIN, INT_MAX, true, whosTurn);
+        Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 4, INT_MIN, INT_MAX, true, whosTurn);
         this->setBoard(bestMove);
+        delete bestMove->father;
         cout << "Alpha beta a joue" << endl;
         break;
     }
@@ -573,9 +574,8 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
 }
 
 Game::~Game(){
-    //delete nodes;
-    //delete paths;
-    //delete marbles;
-    free(minimax);
+    delete nodes;
+    delete paths;
+    delete marbles;
 }
 

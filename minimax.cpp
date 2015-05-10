@@ -32,5 +32,7 @@ void Tree::displayConsole () {
 }
 
 Tree::~Tree(){
-
+    for(int i = 0 ; i < sons.size() ; i++){
+        delete sons[i];
+    }
 }
