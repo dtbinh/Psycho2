@@ -3,6 +3,12 @@
 
 /* NODE */
 
+/**
+ * @brief Node::Node Constructor
+ * @param _game the game to attach to
+ * @param _index    id of node
+ * @param _marble   marble on node. NULL if none
+ */
 Node::Node (Game *_game, int _index, Marble* _marble) {
     game = _game;
     index = _index;
@@ -13,13 +19,19 @@ Node::Node (Game *_game, int _index, Marble* _marble) {
     for(int i=0; i<6; i++) dirPaths[i].clear();		// empty for now, will be updated after Path are created
 }
 
+/**
+ * @brief Node::addPath add a reference to a path for node
+ * @param p path to add
+ */
 void Node::addPath (Path *p) {
     int i;
     for(i=0; (i<3) && (paths[i]!=NULL) && (paths[i]!=p); i++);
     paths[i] = p;
     isSpecial = (paths[2] != NULL);
 }
-
+/**
+ * @brief Node::updateDirPath order node paths in several directions
+ */
 void Node::updateDirPath () {
     int ii = 0;
     for(int i=0; (i<3) && (paths[i]!=NULL); i++) {
@@ -42,6 +54,10 @@ void Node::updateDirPath () {
     }
 }
 
+/**
+ * @brief Node::display Display informations in console
+ * @param full true if all informations needed
+ */
 void Node::display (bool full) {
     cout << index << " -> " << (isSpecial?"x ":"  ") << (isExtraNode?"x ":"  ");
     for (int i=0; i<3; i++) if (paths[i]!=NULL) cout << paths[i]->index << " ";
@@ -60,6 +76,13 @@ void Node::display (bool full) {
 
 /* PATH */
 
+
+/**
+ * @brief Path::Path
+ * @param _game
+ * @param _index
+ * @param idxList
+ */
 Path::Path (Game *_game, int _index, vector<int> idxList) {
     game = _game;
     index = _index;
@@ -73,6 +96,9 @@ Path::Path (Game *_game, int _index, vector<int> idxList) {
     updateMarbles();							// update Marbles
 }
 
+/**
+ * @brief Path::updateMarbles
+ */
 void Path::updateMarbles () {
     this->marbles.clear();
     for(int i = 0; i < size; i++){
@@ -82,6 +108,13 @@ void Path::updateMarbles () {
     }
 }
 
+/**
+ * @brief Path::countSpecialNodesInBetween
+ * @param n1
+ * @param n2
+ * @param n3
+ * @return
+ */
 int Path::countSpecialNodesInBetween (Node *n1, Node *n2, Node *n3) {
     int nodeId = 0;
     int specialNodes = 0;
@@ -102,6 +135,13 @@ int Path::countSpecialNodesInBetween (Node *n1, Node *n2, Node *n3) {
     return specialNodes;
 }
 
+/**
+ * @brief Path::wellOrdered
+ * @param n1
+ * @param n2
+ * @param n3
+ * @return
+ */
 bool Path::wellOrdered (Node *n1, Node *n2, Node *n3) {
     bool extFound = false;
     if(isBorder){
@@ -117,6 +157,9 @@ bool Path::wellOrdered (Node *n1, Node *n2, Node *n3) {
     return true;
 }
 
+/**
+ * @brief Path::display
+ */
 void Path::display () {
     cout << index << " -> (" << size << ") ";
     for (int i=0; i<size; i++) cout << nodes[i]->index << " ";
@@ -126,6 +169,13 @@ void Path::display () {
 
 /* MARBLE */
 
+/**
+ * @brief Marble::Marble
+ * @param _game
+ * @param _node
+ * @param _type
+ * @param _player
+ */
 Marble::Marble (Game *_game, Node *_node, int _type, int _player) {
     game = _game;
     node = _node;
@@ -134,12 +184,21 @@ Marble::Marble (Game *_game, Node *_node, int _type, int _player) {
     node->marble = this;
 }
 
+/**
+ * @brief Marble::display
+ * @param full
+ * @param cr
+ */
 void Marble::display (bool full, bool cr) {
     cout << owner << (isAlive()?" x ":"   ") << node->index << "\t" << type2str(type) << "  ";
     if (full) for (int j=0; j<accessibleNodes.size(); j++) cout << accessibleNodes[j]->index << " ";
     if (cr) cout << endl;
 }
 
+/**
+ * @brief Marble::move
+ * @param dst
+ */
 void Marble::move (Node *dst) {
     // PB
     Node* src = this->node;
@@ -163,6 +222,9 @@ void Marble::move (Node *dst) {
     }
 }
 
+/**
+ * @brief Marble::kill
+ */
 void Marble::kill () {
     Node* src = this->node;
     int firstIndexFree = NBNODES;
@@ -174,6 +236,9 @@ void Marble::kill () {
     }
 }
 
+/**
+ * @brief Marble::updateAccessibleNodes
+ */
 void Marble::updateAccessibleNodes () {
     accessibleNodes.clear ();
     bool semi_paralysis = false;
@@ -226,6 +291,10 @@ void Marble::updateAccessibleNodes () {
     // no check for: capture (suicide) / respawn //
 }
 
+/**
+ * @brief Marble::isCaptured
+ * @return
+ */
 bool Marble::isCaptured(){
     vector<int> surrounded;
     vector<int> watched;
@@ -266,8 +335,16 @@ bool Marble::isCaptured(){
     return false;
 }
 
+/**
+ * @brief Marble::isAlive
+ * @return
+ */
 bool Marble::isAlive(){ return this->node->index < NBNODES;}
 
+/**
+ * @brief Marble::isOnBorder
+ * @return
+ */
 bool Marble::isOnBorder(){
     for(int i = 0; i < 3; i++){
         if(this->node->paths[i] != NULL && this->node->paths[i]->isBorder)
@@ -276,14 +353,29 @@ bool Marble::isOnBorder(){
     return false;
 }
 
+/**
+ * @brief Marble::type2str
+ * @param type
+ * @return
+ */
 string Marble::type2str (MarbleType type) {
     return (type==PKP)?"psychopath":((type==PSY)?"psychologist":((type==INF)?"doctor":((type==DEL)?"informer":"unknown")));
 }
 
+/**
+ * @brief Marble::type2int
+ * @param type
+ * @return
+ */
 int Marble::type2int (MarbleType type) {
     return (type==PKP)?0:((type==PSY)?3:((type==INF)?2:((type==DEL)?1:-1)));
 }
 
+/**
+ * @brief Marble::int2type
+ * @param type
+ * @return
+ */
 MarbleType Marble::int2type (int type) {
     return (type==0)?PKP:((type==3)?PSY:((type==2)?INF:((type==1)?DEL:X)));
 }
