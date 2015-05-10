@@ -412,12 +412,14 @@ void Game::playerDoAMove(int player){
         while(marbles[whosTurn][marble]->accessibleNodes.empty()) marble = (marble + 1) % NBMARBLES;
         int move = rand() % marbles[whosTurn][marble]->accessibleNodes.size();
         marbles[whosTurn][marble]->move(marbles[whosTurn][marble]->accessibleNodes[move]);
+        cout << "Random a joue" << endl;
         break;
     }
     case ALPHABETA:
     {
         Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 3, INT_MIN, INT_MAX, true, whosTurn);
         this->setBoard(bestMove);
+        cout << "Alpha beta a joue" << endl;
         break;
     }
     case BETTERRDM:
