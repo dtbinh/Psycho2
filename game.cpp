@@ -200,12 +200,12 @@ int Game::eval (int player) {
 }
 
 
-Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
+Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer, int whoIsMaximizing) {
     if(currentNode == NULL){
         currentNode = new Tree(this, NULL);
     }
     if(depth == 0){
-        currentNode->score = this->eval(0);
+        currentNode->score = this->eval(whoIsMaximizing);
         return currentNode;
     }
     if(maximizingPlayer){
@@ -217,13 +217,13 @@ Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
             if(j == 1 && depth == 3){
                 cout << "pb" << endl;
             }
-            Marble* m = marbles[0][j];
+            Marble* m = marbles[whoIsMaximizing][j];
             m->updateAccessibleNodes();
             for(int k = 0; k < m->accessibleNodes.size(); k++){
                 m->move(m->accessibleNodes[k]);
                 Tree* son = new Tree(this, currentNode);
                 currentNode->addNewSon(son);
-                runMinimax(son, depth-1, false);
+                runMinimax(son, depth-1, false, whoIsMaximizing);
                 if(currentNode->score < son->score){
                     currentNode->score = son->score;
                     keptSon = son;
@@ -239,13 +239,13 @@ Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
         Tree* keptSon;
         this->setBoard(currentNode);
         for(int j = 0; j < NBMARBLES; j++){
-            Marble* m = marbles[1][j];
+            Marble* m = marbles[(whoIsMaximizing+1)%2][j];
             m->updateAccessibleNodes();
             for(int k = 0; k < m->accessibleNodes.size(); k++){
                 m->move(m->accessibleNodes[k]);
                 Tree* son = new Tree(this, currentNode);
                 currentNode->addNewSon(son);
-                runMinimax(son, depth-1, true);
+                runMinimax(son, depth-1, true, whoIsMaximizing);
                 if(currentNode->score > son->score){
                     currentNode->score = son->score;
                     keptSon = son;
@@ -416,7 +416,7 @@ void Game::playerDoAMove(int player){
     }
     case ALPHABETA:
     {
-        Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 3, INT_MIN, INT_MAX, true, whosTurn);
+        Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 4, INT_MIN, INT_MAX,true, whosTurn);
         this->setBoard(bestMove);
         break;
     }

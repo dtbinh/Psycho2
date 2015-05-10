@@ -25,7 +25,7 @@ int main()
     for(int i = 0 ; i < parties ; i++){
         cout << i << endl;
         game = new Game();
-        cpt = game->letsplay(HUMAN, RANDOM); // CHOOSE THE PLAYERS HERE. HUMAN CAN ONLY BE PLAYER WHITE
+        cpt = game->letsplay(HUMAN, ALPHABETA); // CHOOSE THE PLAYERS HERE. HUMAN CAN ONLY BE PLAYER WHITE
         coupsTot+=abs(cpt);
         if(cpt > 0) victoiresBlanc++;
         else victoiresNoir++;
