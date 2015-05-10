@@ -3,28 +3,28 @@
 
 using namespace std;
 
-extern const int NBNODES;
-extern const int NBPATHS;
-extern const int NBMARBLES;
-extern const int BOARDSIZE;
+extern const int NBNODES;           // number of nodes in board
+extern const int NBPATHS;           // number of paths in board
+extern const int NBMARBLES;         // number of marbles PER PLAYER
+extern const int BOARDSIZE;         // total number of nodes in board
 
-extern const string DATAPATH;
-extern const string PATHSFILE;
-extern const string OPENINGFILE;
-extern const string CURPOSFILE;
+extern const string DATAPATH;       // file path to data folder
+extern const string PATHSFILE;      // file path to paths file
+extern const string OPENINGFILE;    // file path to initial positions of marbles file
+extern const string CURPOSFILE;     // file path to current positions of marbles file
 
-extern const bool VERBOSE;
-extern const bool GUI;
-extern const int TIMEOUT;
+extern const bool VERBOSE;          // true -> display more informations
+extern const bool GUI;              // true -> update GUI throught positions file
+extern const int TIMEOUT;           // timeout before IA must play
 
-extern const int ALPHABETA;
-extern const int HUMAN;
-extern const int RANDOM;
-extern const int BETTERRDM;
+extern const int ALPHABETA;         // represents alphabeta
+extern const int HUMAN;             // represents human
+extern const int RANDOM;            // represents random
+extern const int BETTERRDM;         // represents betterrdm
 
-static void warningMsg (string s) { cout << s << endl; }
-static void exitError (string s) { cout << s << endl; exit (EXIT_FAILURE); }
+static void warningMsg (string s) { cout << s << endl; }                        // displays warningMsg
+static void exitError (string s) { cout << s << endl; exit (EXIT_FAILURE); }    // displays error and exit
 
-enum MarbleType { PKP, PSY, INF, DEL, X };
+enum MarbleType { PKP, PSY, INF, DEL, X };                                      // represents type of marbles
 
 #endif
