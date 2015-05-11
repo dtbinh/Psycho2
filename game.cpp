@@ -25,7 +25,9 @@ extern const int RANDOM (03);
 extern const int BETTERRDM (04);
 
 
-
+/**
+ * @brief Game::Game Constructor
+ */
 Game::Game()
 {
     initBoard (PATHSFILE);			// creating nodes and paths
@@ -44,7 +46,10 @@ Game::Game()
 }
 
 
-
+/**
+ * @brief Game::initBoard initialize the board with nodes and paths
+ * @param pathsFile file path to data about the paths
+ */
 void Game::initBoard (string pathsFile) {
     // create nodes (no marble, just empty board)
     for (int i=0; i<BOARDSIZE; i++) nodes[i] = new Node (this, i, NULL);
@@ -76,7 +81,11 @@ void Game::initBoard (string pathsFile) {
     for (int i=0; i<BOARDSIZE; i++) nodes[i]->updateDirPath();
 }
 
-
+/**
+ * @brief Game::initMatch initialize a match with board paths and marbles
+ * @param openingFile file with the marbles
+ * @param turn who's turn to play
+ */
 void Game::initMatch (string openingFile, int turn) {
     // create marbles
     ifstream file;
@@ -100,7 +109,10 @@ void Game::initMatch (string openingFile, int turn) {
     whosTurn = turn;
 }
 
-
+/**
+ * @brief Game::updateGUI update positionsFile for the GUI
+ * @param positionsFile file path to positions File with current positions for the marbles
+ */
 void Game::updateGUI (string positionsFile) {
 
     ofstream file;
@@ -116,6 +128,11 @@ void Game::updateGUI (string positionsFile) {
     else warningMsg ("couldn't open file " + positionsFile);
 }
 
+/**
+ * @brief Game::chooseRespawn (not used currently) player can choose a dead marble to revive. You can only revive a doctor or a delater
+ * @param player player that can revive a marble
+ * @param dst node to put the marble to
+ */
 void Game::chooseRespawn(int player, Node* dst){
     if(player==0){
         float nbINFMort = 0;
@@ -148,6 +165,10 @@ void Game::chooseRespawn(int player, Node* dst){
     }
 }
 
+/**
+ * @brief Game::setBoard replace all the board with a Tree containing board state
+ * @param t Tree containing the board state
+ */
 void Game::setBoard(Tree * t){
     for(int i = 0; i < BOARDSIZE; i++) this->nodes[i]->marble = NULL;
     for(int i = 0; i < 2; i++){
@@ -159,7 +180,11 @@ void Game::setBoard(Tree * t){
     for(int i = 0; i < NBPATHS; i++) this->paths[i]->updateMarbles();
 }
 
-
+/**
+ * @brief Game::eval Evaluation function for minimax / alphabeta algorithms. Check the board and compute a value positive or negative for the player
+ * @param player the player concerned by the eval function.
+ * @return a positive value if this board state is a good one for the player, negative if not.
+ */
 int Game::eval (int player) {
     int evaluation = 0;
     for(int i = 0; i < 2; i++){
@@ -199,7 +224,13 @@ int Game::eval (int player) {
     return evaluation;
 }
 
-
+/**
+ * @brief Game::runMinimax Run minimax algorithm and returns the best Tree. See Wikipedia "minimax" for the algorithm details
+ * @param currentNode Tree to expand
+ * @param depth current depth. Recursively decrease to 0 to stop recursivity.
+ * @param maximizingPlayer true if we are maximizin
+ * @return the tree with the best value returned by eval()
+ */
 Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
     if(currentNode == NULL){
         currentNode = new Tree(this, NULL);
@@ -258,6 +289,16 @@ Tree* Game::runMinimax (Tree* currentNode, int depth, bool maximizingPlayer) {
     }
 }
 
+/**
+ * @brief Game::runMinimaxAlphaBeta run alpha beta algorithm and returns the best Tree. See Wikipedia "alpha beta" for the algorithm details.
+ * @param currentNode Tree to expand
+ * @param depth current depth. Recursively decrease to 0 to stop recursivity.
+ * @param alpha représente le meilleur noeud MAX
+ * @param beta représente le meilleur noeud MIN
+ * @param maximizingPlayer true if we are maximizing
+ * @param whoIsMaximizing the player maximizing
+ * @return the tree with the best value returned by eval()
+ */
 Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int beta, bool maximizingPlayer, int whoIsMaximizing) {
     if(currentNode == NULL){
         currentNode = new Tree(this, NULL);
@@ -319,6 +360,10 @@ Tree* Game::runMinimaxAlphaBeta (Tree* currentNode, int depth, int alpha, int be
     }
 }
 
+/**
+ * @brief Game::pat This function check if a player cannot play anymore (marbles cannot move)
+ * @return true if a player cannot play
+ */
 bool Game::pat(){
     for(int i = 0 ; i < 2 ; i++){
         int possMoves = 0;
@@ -334,6 +379,12 @@ bool Game::pat(){
     return false;
 }
 
+/**
+ * @brief Game::letsplay method to do a match between two players. Parameters are constants to use between HUMAN, RANDOM, and ALPHABETA
+ * @param player0 constant to use between HUMAN, RANDOM, and ALPHABETA
+ * @param player1 constant to use between HUMAN, RANDOM, and ALPHABETA
+ * @return
+ */
 int Game::letsplay(int player0, int player1){
     Marble * psycho0;
     Marble * psycho1;
@@ -362,12 +413,20 @@ int Game::letsplay(int player0, int player1){
     else return -coups;
 }
 
+/**
+ * @brief Game::computePossibilities update accessible nodes for all marbles of a player
+ * @param player we update marble for only one player
+ */
 void Game::computePossibilities(int player){
     for(int i = 0 ; i < NBMARBLES ; i++){
         marbles[player][i]->updateAccessibleNodes();
     }
 }
 
+/**
+ * @brief Game::playerDoAMove switch case between HUMAIN, RANDOM, and ALPHABETA on player, and do a move.
+ * @param player player that plays
+ */
 void Game::playerDoAMove(int player){
     switch(player){
     case HUMAN:
@@ -395,7 +454,7 @@ void Game::playerDoAMove(int player){
             while(file >> currentP >> currentI >> currentT){
               if((player[cpt] != currentP || idNode[cpt] != currentI || type[cpt] != currentT) && currentI != 183){
                   guiChanged = true;
-                  cout << "Mouvement de " << idNode[cpt] << " vers " << currentI << endl;
+                  cout << "Move from " << idNode[cpt] << " to " << currentI << endl;
                   marbles[whosTurn][cpt]->move(nodes[currentI]);
               }
               cpt++;
@@ -412,7 +471,7 @@ void Game::playerDoAMove(int player){
         while(marbles[whosTurn][marble]->accessibleNodes.empty()) marble = (marble + 1) % NBMARBLES;
         int move = rand() % marbles[whosTurn][marble]->accessibleNodes.size();
         marbles[whosTurn][marble]->move(marbles[whosTurn][marble]->accessibleNodes[move]);
-        cout << "Random a joue" << endl;
+        cout << "Random plays" << endl;
         break;
     }
     case ALPHABETA:
@@ -420,17 +479,21 @@ void Game::playerDoAMove(int player){
         Tree* bestMove = this->runMinimaxAlphaBeta(NULL, 4, INT_MIN, INT_MAX, true, whosTurn);
         this->setBoard(bestMove);
         delete bestMove->father;
-        cout << "Alpha beta a joue" << endl;
+        cout << "Alpha beta plays" << endl;
         break;
     }
-    case BETTERRDM:
+    case BETTERRDM: //not implemented yet
         break;
     }
 
 
 }
 
-
+/**
+ * @brief Game::nextTurn Change the player to play and make him plays
+ * @param player0 white
+ * @param player1 black
+ */
 void Game::nextTurn(int player0, int player1){
     if(whosTurn == 0){
         playerDoAMove(player0);
@@ -442,6 +505,12 @@ void Game::nextTurn(int player0, int player1){
 
 /* TESTS */
 
+/**
+ * @brief Game::generateGames statistics tests, average and standard deviation. Displays statistics in console
+ * @param nbGames amount of games to generate. More games -> more accurate statistics
+ * @param nbDead Number of marbles to kill
+ * @param nbBorder Number of marbles to place on border
+ */
 void Game::generateGames(int nbGames, int nbDead, int nbBorder){
     bool alreadyMarble;
     int type;
@@ -561,7 +630,7 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
     }
 
     average /= (double)nbGames;
-    cout << endl << endl << "Moyenne : " << average << endl;
+    cout << endl << endl << "Average : " << average << endl;
 
     // calcul ecart type
     for(int n = 0 ; n < nbGames ; n++){
@@ -569,10 +638,13 @@ void Game::generateGames(int nbGames, int nbDead, int nbBorder){
     }
     variance = 1.0/(double)nbGames * variance;
 
-    cout << endl << "Ecart type : " << sqrt(variance) << endl;
+    cout << endl << "Standard deviation : " << sqrt(variance) << endl;
 
 }
 
+/**
+ * @brief Game::~Game Destructor
+ */
 Game::~Game(){
     delete nodes;
     delete paths;
